@@ -75,3 +75,9 @@ INSERT INTO pavillons(numeropavillon, campusid, nom) VALUES
  ('C1', 0, 'Pavillon Joseph-Armand Bombardier')
 ,('C2', 0, 'Pavillon Joseph-Armand Bombardier C2')
 ,('D7', 0, 'Pavillon Marie-Victorin');
+
+INSERT INTO facultes(faculteid, nom) VALUES
+ (18,'Génie');
+
+INSERT INTO departements(departementID, faculteID, nom) VALUES
+ (08,18,'Département génie électrique et informatique');
