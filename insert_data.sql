@@ -45,3 +45,14 @@ INSERT INTO categories(categorieid,nom) VALUES
 ,(0930,'Salon du personnel')
 ,(1030,'Studio d’enregistrement')
 ,(1260,'Hall d’entrée');
+
+-- Insertion des campus et pavillons
+INSERT INTO campus(campusid, nom) VALUES
+ (0,'Campus principal')
+,(1,'Campus de longueuil')
+,(2,'Campus de la santé');
+
+INSERT INTO pavillons(numeropavillon, campusid, nom) VALUES
+ ('C1', 0, 'Pavillon Joseph-Armand Bombardier')
+,('C2', 0, 'Pavillon Joseph-Armand Bombardier C2')
+,('D7', 0, 'Pavillon Marie-Victorin');
