@@ -177,7 +177,7 @@ create table CATEGORIES (
    CATEGORIEID          INT4                 not null,
    NOM                  VARCHAR(1024)        not null,
    BLOCDEBUT            INT4                 not null     DEFAULT 0,
-   BLOCFIN              INT4                 not null     DEFAULT 96,
+   BLOCFIN              INT4                 not null     DEFAULT 95,
    constraint PK_CATEGORIES primary key (CATEGORIEID)
 );
 
