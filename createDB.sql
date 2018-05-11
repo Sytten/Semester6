@@ -126,7 +126,7 @@ CAMPUSID
 create table CARACTERISTIQUELOCAL (
    EQUIPEMENTID         INT4                 not null,
    NUMEROPAVILLION      VARCHAR(16)          not null,
-   NUMERO               VARCHAR(2)           not null,
+   NUMERO               INT4                 not null,
    constraint PK_CARACTERISTIQUELOCAL primary key (NUMEROPAVILLION, EQUIPEMENTID, NUMERO)
 );
 
@@ -176,8 +176,8 @@ EQUIPEMENTID
 create table CATEGORIES (
    CATEGORIEID          INT4                 not null,
    NOM                  VARCHAR(1024)        not null,
-   BLOCDEBUT            INT4                 not null     DEFAULT 0,
-   BLOCFIN              INT4                 not null     DEFAULT 95,
+   BLOCDEBUT            INT4                 not null,
+   BLOCFIN              INT4                 not null,
    constraint PK_CATEGORIES primary key (CATEGORIEID)
 );
 
@@ -249,9 +249,9 @@ FACULTEID
 /*==============================================================*/
 create table LOCAUX (
    NUMEROPAVILLION      VARCHAR(16)          not null,
-   NUMERO               VARCHAR(2)           not null,
+   NUMERO               INT4                 not null,
    PAVILLION_PARENT     VARCHAR(16)          null,
-   LOCAL_PARENT         VARCHAR(2)           null,
+   LOCAL_PARENT         INT4                 null,
    CATEGORIEID          INT4                 not null,
    CAPACITE             INT4                 not null,
    constraint PK_LOCAUX primary key (NUMEROPAVILLION, NUMERO)
@@ -293,7 +293,7 @@ LOCAL_PARENT
 create table LOGS (
    CIP                  VARCHAR(8)           not null,
    NUMEROPAVILLION      VARCHAR(16)          null,
-   NUMERO               VARCHAR(2)           null,
+   NUMERO               INT4                 null,
    LOGDATE              DATE                 not null,
    MESSAGE              VARCHAR(1024)        not null
 );
@@ -407,7 +407,7 @@ create table RESEVATION (
    NBRBLOC              INT4                 not null,
    EVENEMENTID          INT4                 not null,
    NUMEROPAVILLION      VARCHAR(16)          not null,
-   NUMERO               VARCHAR(2)           not null,
+   NUMERO               INT4                 not null,
    constraint PK_RESEVATION primary key (DATE, NBRBLOC)
 );
 
