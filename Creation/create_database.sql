@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      PostgreSQL 8                                 */
-/* Created on:     5/12/2018 11:26:29 AM                        */
+/* Created on:     5/12/2018 12:13:31 PM                        */
 /*==============================================================*/
 
 
@@ -74,11 +74,13 @@ drop index if exists PRIVILEGESRESERVATION_PK;
 
 drop table if exists PRIVILEGESRESERVATION cascade;
 
+drop index if exists MEMBRE_RESERVATIONS_FK;
+
 drop index if exists LOCAUX_RESERVATION_FK;
 
 drop index if exists EVENEMENTS_RESERVATION_FK;
 
-drop index if exists RESEVATION_PK;
+drop index if exists RESERVATIONS_PK;
 
 drop table if exists RESERVATIONS cascade;
 
@@ -409,13 +411,14 @@ create table RESERVATIONS (
    DATE                 DATE                 not null,
    NUMEROBLOC           INT4                 not null,
    EVENEMENTID          INT4                 not null,
+   CIP                  VARCHAR(8)           not null,
    constraint PK_RESERVATIONS primary key (NUMEROPAVILLON, NUMEROLOCAL, DATE, NUMEROBLOC)
 );
 
 /*==============================================================*/
-/* Index: RESEVATION_PK                                         */
+/* Index: RESERVATIONS_PK                                       */
 /*==============================================================*/
-create unique index RESEVATION_PK on RESERVATIONS (
+create unique index RESERVATIONS_PK on RESERVATIONS (
 NUMEROPAVILLON,
 NUMEROLOCAL,
 DATE,
@@ -435,6 +438,13 @@ EVENEMENTID
 create  index LOCAUX_RESERVATION_FK on RESERVATIONS (
 NUMEROPAVILLON,
 NUMEROLOCAL
+);
+
+/*==============================================================*/
+/* Index: MEMBRE_RESERVATIONS_FK                                */
+/*==============================================================*/
+create  index MEMBRE_RESERVATIONS_FK on RESERVATIONS (
+CIP
 );
 
 /*==============================================================*/
@@ -596,6 +606,11 @@ alter table RESERVATIONS
 alter table RESERVATIONS
    add constraint FK_RESERVAT_LOCAUX_RE_LOCAUX foreign key (NUMEROPAVILLON, NUMEROLOCAL)
       references LOCAUX (NUMEROPAVILLON, NUMEROLOCAL)
+      on delete restrict on update restrict;
+
+alter table RESERVATIONS
+   add constraint FK_RESERVAT_MEMBRE_RE_MEMBRES foreign key (CIP)
+      references MEMBRES (CIP)
       on delete restrict on update restrict;
 
 alter table STATUSMEMBRE
