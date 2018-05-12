@@ -83,6 +83,19 @@ INSERT INTO facultes(faculteid, nom) VALUES
 INSERT INTO departements(departementID, faculteID, nom) VALUES
  (08,18,'Département génie électrique et informatique');
 
+ -- Insertion des status et privileges
+INSERT INTO status(statusID, nom) VALUES
+ (0,'Professeur')
+,(1,'Etudiant')
+,(2,'Personnel-de-soutien')
+,(3,'Administrateur');
+
+INSERT INTO privilegesreservation(statusID, categorieID, plusde24h, ecriture, override) VALUES
+ (0,0110,0,1,1)
+,(1,0110,0,0,0)
+,(2,0110,0,1,0)
+,(3,0110,1,1,1)
+
 -- Insertion des locaux et leurs caracteristiques
 INSERT INTO locaux(numeropavillon, numerolocal, numeropavillonparent, numerolocalparent, categorieid, capacite, note) VALUES
  ('C1',1007,null,null,0212,21,'Grand')
@@ -117,7 +130,7 @@ INSERT INTO locaux(numeropavillon, numerolocal, numeropavillonparent, numeroloca
 ,('C2',1042,null,null,0211,21,'Laboratoire chimie-physique')
 ,('C2',2040,null,null,0211,40,'Laboratoire sans instrument')
 ,('C2',251,null,null,0211,10,'')
-,('C2',4,'C2',251,0211,10,'')
+,('C2',25104,'C2',251,0211,10,'')
 ,('D7',2018,null,null,0111,57,'')
 ,('D7',3001,null,null,0110,35,'')
 ,('D7',3002,null,null,0110,22,'')
