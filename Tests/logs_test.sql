@@ -1,4 +1,4 @@
-SELECT truncate_all_tables('POSTGRES');
+/* SELECT truncate_all_tables(); */
 
 INSERT INTO membres(cip, faculteID, departementID, nom, prenom) VALUES
  ('girp2705', 18, 08, 'girard', 'philippe');
