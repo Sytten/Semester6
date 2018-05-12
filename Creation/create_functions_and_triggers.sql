@@ -1,3 +1,8 @@
+/* ADD DEFAULT CONSTRAINT TO CATEGORIES */
+ALTER TABLE categories ALTER blocDebut SET DEFAULT 0;
+ALTER TABLE categories ALTER blocFin SET DEFAULT 95;
+
+
 /* TRUNCATE ALL TABLES */
 CREATE OR REPLACE FUNCTION truncate_all_tables() RETURNS void AS $$
 DECLARE
@@ -15,13 +20,13 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION trail_user() RETURNS TRIGGER AS $$
 	begin
 		IF (TG_OP = 'DELETE') THEN
-		 INSERT INTO logs(cip, numeropavillon, numero, logDate, message) VALUES
+		 INSERT INTO logs(cip, numeropavillon, numeroLocal, logDate, message) VALUES
 		  (OLD.cip, null, null, now(), 'user deleted');
 		ELSIF (TG_OP = 'UPDATE') THEN
-		 INSERT INTO logs(cip, numeropavillon, numero, logDate, message) VALUES
+		 INSERT INTO logs(cip, numeropavillon, numeroLocal, logDate, message) VALUES
 		  (NEW.cip, null, null, now(), 'user updated');
 		ELSIF (TG_OP = 'INSERT') THEN
-		 INSERT INTO logs(cip, numeropavillon, numero, logDate, message) VALUES
+		 INSERT INTO logs(cip, numeropavillon, numeroLocal, logDate, message) VALUES
 		  (NEW.cip, null, null, now(), 'user created');
 		END IF;
 		RETURN NULL;

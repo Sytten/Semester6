@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      PostgreSQL 8                                 */
-/* Created on:     5/11/2018 3:27:01 PM                         */
+/* Created on:     5/12/2018 11:26:29 AM                        */
 /*==============================================================*/
 
 
@@ -80,7 +80,7 @@ drop index if exists EVENEMENTS_RESERVATION_FK;
 
 drop index if exists RESEVATION_PK;
 
-drop table if exists RESEVATION cascade;
+drop table if exists RESERVATIONS cascade;
 
 drop index if exists STATUS_PK;
 
@@ -126,8 +126,8 @@ CAMPUSID
 create table CARACTERISTIQUELOCAL (
    EQUIPEMENTID         INT4                 not null,
    NUMEROPAVILLON       VARCHAR(16)          not null,
-   NUMERO               INT4                 not null,
-   constraint PK_CARACTERISTIQUELOCAL primary key (NUMEROPAVILLON, EQUIPEMENTID, NUMERO)
+   NUMEROLOCAL          INT4                 not null,
+   constraint PK_CARACTERISTIQUELOCAL primary key (NUMEROPAVILLON, EQUIPEMENTID, NUMEROLOCAL)
 );
 
 /*==============================================================*/
@@ -136,7 +136,7 @@ create table CARACTERISTIQUELOCAL (
 create unique index CARACTERISTIQUELOCAL_PK on CARACTERISTIQUELOCAL (
 NUMEROPAVILLON,
 EQUIPEMENTID,
-NUMERO
+NUMEROLOCAL
 );
 
 /*==============================================================*/
@@ -151,7 +151,7 @@ EQUIPEMENTID
 /*==============================================================*/
 create  index CARACTERISTIQUELOCAL2_FK on CARACTERISTIQUELOCAL (
 NUMEROPAVILLON,
-NUMERO
+NUMEROLOCAL
 );
 
 /*==============================================================*/
@@ -176,8 +176,8 @@ EQUIPEMENTID
 create table CATEGORIES (
    CATEGORIEID          INT4                 not null,
    NOM                  VARCHAR(1024)        not null,
-   BLOCDEBUT            INT4                 not null     DEFAULT 0,
-   BLOCFIN              INT4                 not null     DEFAULT 95,
+   BLOCDEBUT            INT4                 not null,
+   BLOCFIN              INT4                 not null,
    constraint PK_CATEGORIES primary key (CATEGORIEID)
 );
 
@@ -249,13 +249,13 @@ FACULTEID
 /*==============================================================*/
 create table LOCAUX (
    NUMEROPAVILLON       VARCHAR(16)          not null,
-   NUMERO               INT4                 not null,
-   PAVILLONPARENT       VARCHAR(16)          null,
-   NUMEROPARENT         INT4                 null,
+   NUMEROLOCAL          INT4                 not null,
+   NUMEROPAVILLONPARENT VARCHAR(16)          null,
+   NUMEROLOCALPARENT    INT4                 null,
    CATEGORIEID          INT4                 not null,
    CAPACITE             INT4                 not null,
    NOTE                 TEXT                 null,
-   constraint PK_LOCAUX primary key (NUMEROPAVILLON, NUMERO)
+   constraint PK_LOCAUX primary key (NUMEROPAVILLON, NUMEROLOCAL)
 );
 
 /*==============================================================*/
@@ -263,7 +263,7 @@ create table LOCAUX (
 /*==============================================================*/
 create unique index LOCAUX_PK on LOCAUX (
 NUMEROPAVILLON,
-NUMERO
+NUMEROLOCAL
 );
 
 /*==============================================================*/
@@ -284,8 +284,8 @@ CATEGORIEID
 /* Index: LOCAUX_LOCAUX_FK                                      */
 /*==============================================================*/
 create  index LOCAUX_LOCAUX_FK on LOCAUX (
-PAVILLONPARENT,
-NUMEROPARENT
+NUMEROPAVILLONPARENT,
+NUMEROLOCALPARENT
 );
 
 /*==============================================================*/
@@ -294,8 +294,8 @@ NUMEROPARENT
 create table LOGS (
    CIP                  VARCHAR(8)           not null,
    NUMEROPAVILLON       VARCHAR(16)          null,
-   NUMERO               INT4                 null,
-   LOGDATE              DATE                 not null,
+   NUMEROLOCAL          INT4                 null,
+   LOGDATE              TIMESTAMP            not null,
    MESSAGE              VARCHAR(1024)        not null
 );
 
@@ -304,7 +304,7 @@ create table LOGS (
 /*==============================================================*/
 create  index LOCAUX_LOGS_FK on LOGS (
 NUMEROPAVILLON,
-NUMERO
+NUMEROLOCAL
 );
 
 /*==============================================================*/
@@ -401,38 +401,40 @@ CATEGORIEID
 );
 
 /*==============================================================*/
-/* Table: RESEVATION                                            */
+/* Table: RESERVATIONS                                          */
 /*==============================================================*/
-create table RESEVATION (
-   DATE                 DATE                 not null,
-   NBRBLOC              INT4                 not null,
-   EVENEMENTID          INT4                 not null,
+create table RESERVATIONS (
    NUMEROPAVILLON       VARCHAR(16)          not null,
-   NUMERO               INT4                 not null,
-   constraint PK_RESEVATION primary key (DATE, NBRBLOC)
+   NUMEROLOCAL          INT4                 not null,
+   DATE                 DATE                 not null,
+   NUMEROBLOC           INT4                 not null,
+   EVENEMENTID          INT4                 not null,
+   constraint PK_RESERVATIONS primary key (NUMEROPAVILLON, NUMEROLOCAL, DATE, NUMEROBLOC)
 );
 
 /*==============================================================*/
 /* Index: RESEVATION_PK                                         */
 /*==============================================================*/
-create unique index RESEVATION_PK on RESEVATION (
+create unique index RESEVATION_PK on RESERVATIONS (
+NUMEROPAVILLON,
+NUMEROLOCAL,
 DATE,
-NBRBLOC
+NUMEROBLOC
 );
 
 /*==============================================================*/
 /* Index: EVENEMENTS_RESERVATION_FK                             */
 /*==============================================================*/
-create  index EVENEMENTS_RESERVATION_FK on RESEVATION (
+create  index EVENEMENTS_RESERVATION_FK on RESERVATIONS (
 EVENEMENTID
 );
 
 /*==============================================================*/
 /* Index: LOCAUX_RESERVATION_FK                                 */
 /*==============================================================*/
-create  index LOCAUX_RESERVATION_FK on RESEVATION (
+create  index LOCAUX_RESERVATION_FK on RESERVATIONS (
 NUMEROPAVILLON,
-NUMERO
+NUMEROLOCAL
 );
 
 /*==============================================================*/
@@ -490,7 +492,7 @@ create table TEMPSAVANTRESERVATION (
    CATEGORIEID          INT4                 not null,
    FACULTEID            INT4                 not null,
    DEPARTEMENTID        INT4                 not null,
-   NBRBLOC              INT4                 not null,
+   NUMEROBLOC           INT4                 not null,
    constraint PK_TEMPSAVANTRESERVATION primary key (FACULTEID, STATUSID, CATEGORIEID, DEPARTEMENTID)
 );
 
@@ -532,8 +534,8 @@ alter table CARACTERISTIQUELOCAL
       on delete restrict on update restrict;
 
 alter table CARACTERISTIQUELOCAL
-   add constraint FK_CARACTER_CARACTERI_LOCAUX foreign key (NUMEROPAVILLON, NUMERO)
-      references LOCAUX (NUMEROPAVILLON, NUMERO)
+   add constraint FK_CARACTER_CARACTERI_LOCAUX foreign key (NUMEROPAVILLON, NUMEROLOCAL)
+      references LOCAUX (NUMEROPAVILLON, NUMEROLOCAL)
       on delete restrict on update restrict;
 
 alter table DEPARTEMENTS
@@ -547,8 +549,8 @@ alter table LOCAUX
       on delete restrict on update restrict;
 
 alter table LOCAUX
-   add constraint FK_LOCAUX_LOCAUX_LO_LOCAUX foreign key (PAVILLONPARENT, NUMEROPARENT)
-      references LOCAUX (NUMEROPAVILLON, NUMERO)
+   add constraint FK_LOCAUX_LOCAUX_LO_LOCAUX foreign key (NUMEROPAVILLONPARENT, NUMEROLOCALPARENT)
+      references LOCAUX (NUMEROPAVILLON, NUMEROLOCAL)
       on delete restrict on update restrict;
 
 alter table LOCAUX
@@ -557,8 +559,8 @@ alter table LOCAUX
       on delete restrict on update restrict;
 
 alter table LOGS
-   add constraint FK_LOGS_LOCAUX_LO_LOCAUX foreign key (NUMEROPAVILLON, NUMERO)
-      references LOCAUX (NUMEROPAVILLON, NUMERO)
+   add constraint FK_LOGS_LOCAUX_LO_LOCAUX foreign key (NUMEROPAVILLON, NUMEROLOCAL)
+      references LOCAUX (NUMEROPAVILLON, NUMEROLOCAL)
       on delete restrict on update restrict;
 
 alter table LOGS
@@ -586,14 +588,14 @@ alter table PRIVILEGESRESERVATION
       references CATEGORIES (CATEGORIEID)
       on delete restrict on update restrict;
 
-alter table RESEVATION
-   add constraint FK_RESEVATI_EVENEMENT_EVENEMEN foreign key (EVENEMENTID)
+alter table RESERVATIONS
+   add constraint FK_RESERVAT_EVENEMENT_EVENEMEN foreign key (EVENEMENTID)
       references EVENEMENTS (EVENEMENTID)
       on delete restrict on update restrict;
 
-alter table RESEVATION
-   add constraint FK_RESEVATI_LOCAUX_RE_LOCAUX foreign key (NUMEROPAVILLON, NUMERO)
-      references LOCAUX (NUMEROPAVILLON, NUMERO)
+alter table RESERVATIONS
+   add constraint FK_RESERVAT_LOCAUX_RE_LOCAUX foreign key (NUMEROPAVILLON, NUMEROLOCAL)
+      references LOCAUX (NUMEROPAVILLON, NUMEROLOCAL)
       on delete restrict on update restrict;
 
 alter table STATUSMEMBRE
