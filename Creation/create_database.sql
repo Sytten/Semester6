@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      PostgreSQL 8                                 */
-/* Created on:     5/12/2018 12:13:31 PM                        */
+/* Created on:     5/12/2018 3:03:14 PM                         */
 /*==============================================================*/
 
 
@@ -220,6 +220,7 @@ FACULTEID
 /*==============================================================*/
 create table EVENEMENTS (
    EVENEMENTID          INT4                 not null,
+   NOM                  VARCHAR(1024)        null,
    constraint PK_EVENEMENTS primary key (EVENEMENTID)
 );
 
