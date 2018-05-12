@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      PostgreSQL 8                                 */
-/* Created on:     5/12/2018 12:01:07 PM                        */
+/* Created on:     5/12/2018 12:05:04 PM                        */
 /*==============================================================*/
 
 
@@ -609,7 +609,7 @@ alter table RESERVATIONS
       on delete restrict on update restrict;
 
 alter table RESERVATIONS
-   add constraint FK_RESERVAT_RELATIONS_MEMBRES foreign key (CIP)
+   add constraint FK_RESERVAT_MEMBRES_R_MEMBRES foreign key (CIP)
       references MEMBRES (CIP)
       on delete restrict on update restrict;
 
