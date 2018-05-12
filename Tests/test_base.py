@@ -21,3 +21,6 @@ class TestBase(unittest.TestCase):
     def tearDown(self):
         self.cur.close()
         self.conn.close()
+
+    def run_sqlf(self, filename):
+        self.cur.execute(open("./SQL/" + filename, "r").read())
