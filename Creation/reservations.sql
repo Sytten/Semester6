@@ -60,20 +60,38 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION verification_droit_reservation(reservation calendrier) RETURNS VOID AS $$
 DECLARE
   categorie INTEGER;
+  faculte INTEGER;
+  departement INTEGER;
   sum_plusde24h INTEGER;
   sum_ecriture INTEGER;
+  max_temps INTERVAL;
+  diff_temps INTERVAL;
 BEGIN
   SELECT categorieid INTO categorie FROM locaux
-  WHERE numerolocal=reservation.numerolocal AND numeropavillon=reservation.numeropavillon;
+    WHERE numerolocal=reservation.numerolocal AND numeropavillon=reservation.numeropavillon;
+  SELECT faculteid, departementid INTO faculte, departement FROM membres
+    WHERE cip=reservation.cip;
 
-
+  -- Privileges
   SELECT SUM(ecriture), SUM(plusde24h) INTO sum_ecriture, sum_plusde24h FROM privilegesreservation
-  WHERE categorieid=categorie AND statusid IN (SELECT statusid
-                                               FROM statusmembre
-                                               WHERE cip=reservation.cip);
+    WHERE categorieid=categorie AND statusid IN (SELECT statusid
+                                                 FROM statusmembre
+                                                 WHERE cip=reservation.cip);
 
   IF sum_ecriture = 0 OR sum_ecriture IS NULL THEN
     RAISE EXCEPTION 'Vous ne pouvez pas reserver ce local';
+  END IF;
+
+  -- Temps avant reservation
+  SELECT MAX(numerobloc) * INTERVAL '15 minutes' INTO max_temps FROM tempsavantreservation
+    WHERE categorieid=categorie AND departementid=departement AND faculteid=faculte AND statusid IN (SELECT statusid
+                                                                                                     FROM statusmembre
+                                                                                                     WHERE cip=reservation.cip);
+
+  diff_temps := now() - (reservation.date + reservation.blocDebut * INTERVAL '15 minutes');
+
+  IF (max_temps IS NULL OR diff_temps > max_temps) AND (sum_plusde24h = 0 OR sum_plusde24h IS NULL) THEN
+    RAISE EXCEPTION 'Vous ne pouvez pas reserver autant davance: %s', diff_temps;
   END IF;
 END;
 $$ LANGUAGE plpgsql;
