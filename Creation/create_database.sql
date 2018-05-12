@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      PostgreSQL 8                                 */
-/* Created on:     5/12/2018 12:05:04 PM                        */
+/* Created on:     5/12/2018 12:13:31 PM                        */
 /*==============================================================*/
 
 
@@ -74,13 +74,13 @@ drop index if exists PRIVILEGESRESERVATION_PK;
 
 drop table if exists PRIVILEGESRESERVATION cascade;
 
-drop index if exists RELATIONSHIP_11_FK;
+drop index if exists MEMBRE_RESERVATIONS_FK;
 
 drop index if exists LOCAUX_RESERVATION_FK;
 
 drop index if exists EVENEMENTS_RESERVATION_FK;
 
-drop index if exists RESEVATION_PK;
+drop index if exists RESERVATIONS_PK;
 
 drop table if exists RESERVATIONS cascade;
 
@@ -297,7 +297,7 @@ create table LOGS (
    CIP                  VARCHAR(8)           not null,
    NUMEROPAVILLON       VARCHAR(16)          null,
    NUMEROLOCAL          INT4                 null,
-   LOGDATE              TIMESTAMP            not null,
+   LOGDATE              DATE                 not null,
    MESSAGE              VARCHAR(1024)        not null
 );
 
@@ -416,9 +416,9 @@ create table RESERVATIONS (
 );
 
 /*==============================================================*/
-/* Index: RESEVATION_PK                                         */
+/* Index: RESERVATIONS_PK                                       */
 /*==============================================================*/
-create unique index RESEVATION_PK on RESERVATIONS (
+create unique index RESERVATIONS_PK on RESERVATIONS (
 NUMEROPAVILLON,
 NUMEROLOCAL,
 DATE,
@@ -441,9 +441,9 @@ NUMEROLOCAL
 );
 
 /*==============================================================*/
-/* Index: RELATIONSHIP_11_FK                                    */
+/* Index: MEMBRE_RESERVATIONS_FK                                */
 /*==============================================================*/
-create  index RELATIONSHIP_11_FK on RESERVATIONS (
+create  index MEMBRE_RESERVATIONS_FK on RESERVATIONS (
 CIP
 );
 
@@ -609,7 +609,7 @@ alter table RESERVATIONS
       on delete restrict on update restrict;
 
 alter table RESERVATIONS
-   add constraint FK_RESERVAT_MEMBRES_R_MEMBRES foreign key (CIP)
+   add constraint FK_RESERVAT_MEMBRE_RE_MEMBRES foreign key (CIP)
       references MEMBRES (CIP)
       on delete restrict on update restrict;
 
