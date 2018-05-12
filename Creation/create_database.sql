@@ -297,7 +297,7 @@ create table LOGS (
    CIP                  VARCHAR(8)           not null,
    NUMEROPAVILLON       VARCHAR(16)          null,
    NUMEROLOCAL          INT4                 null,
-   LOGDATE              DATE                 not null,
+   LOGDATE              TIMESTAMP            not null,
    MESSAGE              VARCHAR(1024)        not null
 );
 
