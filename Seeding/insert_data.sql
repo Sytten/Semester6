@@ -94,7 +94,7 @@ INSERT INTO privilegesreservation(statusID, categorieID, plusde24h, ecriture, ov
  (0,0110,0,1,1)
 ,(1,0110,0,0,0)
 ,(2,0110,0,1,0)
-,(3,0110,1,1,1)
+,(3,0110,1,1,1);
 
 -- Insertion des locaux et leurs caracteristiques
 INSERT INTO locaux(numeropavillon, numerolocal, numeropavillonparent, numerolocalparent, categorieid, capacite, note) VALUES
