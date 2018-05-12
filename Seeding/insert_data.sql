@@ -84,7 +84,7 @@ INSERT INTO departements(departementID, faculteID, nom) VALUES
  (08,18,'Département génie électrique et informatique');
 
 -- Insertion des locaux et leurs caracteristiques
-INSERT INTO locaux(numeropavillon, numero, pavillonparent, localparent, categorieid, capacite, note) VALUES
+INSERT INTO locaux(numeropavillon, numero, pavillonparent, numeroparent, categorieid, capacite, note) VALUES
  ('C1',1007,null,null,0212,21,'Grand')
 ,('C1',2018,null,null,0212,10,'Matériaux composites')
 ,('C1',2055,null,null,0211,24,'')
