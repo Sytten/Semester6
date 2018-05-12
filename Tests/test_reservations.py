@@ -16,3 +16,9 @@ class TestReservations(TestBase):
     def test_reservation_conflict(self):
         with self.assertRaises(psycopg2.IntegrityError):
             self.run_sqlf("test_reservation_conflict.sql")
+
+        self.cur.execute("""SELECT * FROM reservations""")
+
+        result = self.cur.fetchall()
+
+        self.assertEqual(len(result), 0)
