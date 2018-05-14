@@ -1,6 +1,3 @@
-INSERT INTO membres(cip, faculteID, departementID, nom, prenom) VALUES
- ('girp2705', 18, 08, 'girard', 'philippe');
+UPDATE categories SET blocdebut = 15 WHERE categorieid = 110;
 
-UPDATE categories SET blocdebut = 15 WHERE categorieid = 212;
-
-INSERT INTO calendrier VALUES ('C1',1007,'2018-04-05','girp2705',3,10);
+INSERT INTO calendrier VALUES ('D7',3020,'2200-04-05','girp2705',3,10);
