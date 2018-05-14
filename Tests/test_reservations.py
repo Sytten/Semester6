@@ -4,6 +4,7 @@ from test_base import TestBase
 
 
 class TestReservations(TestBase):
+    
     def test_add_reservation(self):
         self.run_sqlf_test("test_add_reservation.sql")
 
