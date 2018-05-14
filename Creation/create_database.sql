@@ -1,8 +1,12 @@
 /*==============================================================*/
 /* DBMS name:      PostgreSQL 8                                 */
-/* Created on:     5/12/2018 4:49:20 PM                         */
+/* Created on:     5/14/2018 8:56:51 AM                         */
 /*==============================================================*/
 
+
+drop index if exists BLOCTEMPSPOSSIBLE_PK;
+
+drop table if exists BLOCTEMPSPOSSIBLE cascade;
 
 drop index if exists CAMPUS_PK;
 
@@ -105,6 +109,22 @@ drop index if exists TEMPSAVANTRESERVATION_FK;
 drop index if exists TEMPSAVANTRESERVATION_PK;
 
 drop table if exists TEMPSAVANTRESERVATION cascade;
+
+/*==============================================================*/
+/* Table: BLOCTEMPSPOSSIBLE                                     */
+/*==============================================================*/
+create table BLOCTEMPSPOSSIBLE (
+   BLOCTEMPSID          INT4                 not null,
+   BLOCTEMPSNOM         VARCHAR(1024)        not null,
+   constraint PK_BLOCTEMPSPOSSIBLE primary key (BLOCTEMPSID)
+);
+
+/*==============================================================*/
+/* Index: BLOCTEMPSPOSSIBLE_PK                                  */
+/*==============================================================*/
+create unique index BLOCTEMPSPOSSIBLE_PK on BLOCTEMPSPOSSIBLE (
+BLOCTEMPSID
+);
 
 /*==============================================================*/
 /* Table: CAMPUS                                                */
@@ -220,7 +240,7 @@ FACULTEID
 /*==============================================================*/
 create table EVENEMENTS (
    EVENEMENTID          INT4                 not null,
-   NOM                  VARCHAR(1024)        null,
+   NOM                  VARCHAR(1024)        not null,
    constraint PK_EVENEMENTS primary key (EVENEMENTID)
 );
 
@@ -253,8 +273,8 @@ FACULTEID
 create table LOCAUX (
    NUMEROPAVILLON       VARCHAR(16)          not null,
    NUMEROLOCAL          INT4                 not null,
-   NUMEROPAVILLONPARENT VARCHAR(16)          null,
-   NUMEROLOCALPARENT    INT4                 null,
+   LOC_NUMEROPAVILLON   VARCHAR(16)          null,
+   LOC_NUMEROLOCAL      INT4                 null,
    CATEGORIEID          INT4                 not null,
    CAPACITE             INT4                 not null,
    NOTE                 TEXT                 null,
@@ -287,8 +307,8 @@ CATEGORIEID
 /* Index: LOCAUX_LOCAUX_FK                                      */
 /*==============================================================*/
 create  index LOCAUX_LOCAUX_FK on LOCAUX (
-NUMEROPAVILLONPARENT,
-NUMEROLOCALPARENT
+LOC_NUMEROPAVILLON,
+LOC_NUMEROLOCAL
 );
 
 /*==============================================================*/
@@ -298,7 +318,7 @@ create table LOGS (
    CIP                  VARCHAR(8)           not null,
    NUMEROPAVILLON       VARCHAR(16)          null,
    NUMEROLOCAL          INT4                 null,
-   LOGDATE              TIMESTAMP            not null,
+   LOGDATE              DATE                 not null,
    MESSAGE              VARCHAR(1024)        not null
 );
 
@@ -559,7 +579,7 @@ alter table LOCAUX
       on delete restrict on update restrict;
 
 alter table LOCAUX
-   add constraint FK_LOCAUX_LOCAUX_LO_LOCAUX foreign key (NUMEROPAVILLONPARENT, NUMEROLOCALPARENT)
+   add constraint FK_LOCAUX_LOCAUX_LO_LOCAUX foreign key (LOC_NUMEROPAVILLON, LOC_NUMEROLOCAL)
       references LOCAUX (NUMEROPAVILLON, NUMEROLOCAL)
       on delete restrict on update restrict;
 
