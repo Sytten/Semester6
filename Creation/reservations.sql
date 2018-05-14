@@ -235,7 +235,7 @@ BEGIN
   ELSE
     event_id := event_id + 1;
   END IF;
-  INSERT INTO evenements VALUES (event_id);
+  INSERT INTO evenements VALUES (event_id, event_id || 'event');
 
   -- Create reservations
   SELECT array_agg(numerolocal) INTO sous_locaux FROM locaux WHERE numerolocalparent=NEW.numerolocal and numeropavillonparent=NEW.numeropavillon;
