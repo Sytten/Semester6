@@ -1,6 +1,3 @@
-INSERT INTO membres(cip, faculteID, departementID, nom, prenom) VALUES
- ('girp2705', 18, 08, 'girard', 'philippe');
+INSERT INTO calendrier VALUES ('D7',3020,'2200-04-05','girp2705',30,35);
 
-INSERT INTO calendrier VALUES ('C1',3014,'2018-04-05','girp2705',30,35);
-
-INSERT INTO calendrier VALUES ('C1',3014,'2018-04-05','girp2705',34,37);
+INSERT INTO calendrier VALUES ('D7',3020,'2200-04-05','girp2705',34,37);
