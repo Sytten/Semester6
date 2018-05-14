@@ -11,6 +11,14 @@ class TestReservations(TestBase):
 
         self.assertEqual(len(result), 6)
 
+    def test_add_reservation_without_write_right(self):
+        with self.assertRaisesRegex(psycopg2.InternalError, "Vous ne pouvez pas reserver ce local"):
+            self.db.execute("""INSERT INTO calendrier VALUES ('D7',3020,'2200-04-12','fuge2701',30,35)""")
+
+    def test_add_reservation_temps_avant_reservation_exceeded(self):
+        with self.assertRaisesRegex(psycopg2.InternalError, "Vous ne pouvez pas reserver ce local"):
+            self.db.cur.execute("""INSERT INTO calendrier VALUES ('D7',3020,'2200-04-12','pers1234',30,35)""")
+
     def test_reservation_conflict(self):
         with self.assertRaisesRegex(psycopg2.IntegrityError, "update or delete on table \"evenements\" violates foreign key"):
             self.run_sqlf_test("test_reservation_conflict.sql")

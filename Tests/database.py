@@ -28,18 +28,21 @@ class Database(object):
         self.run_sqlf("Creation", "tableau.sql")
 
     def truncate_all_data(self):
-        print("TRUNCATE ALL DATA")
+        # print("TRUNCATE ALL DATA")
         self.cur.execute("""SELECT truncate_all_tables()""")
 
     def insert_data(self):
-        print("INSERT BASE DATA")
+        # print("INSERT BASE DATA")
         self.run_sqlf("Seeding", "insert_data.sql")
-        print("INSERT MEMBRES")
+        # print("INSERT MEMBRES")
         self.run_sqlf("Seeding", "insert_membre.sql")
 
     def execute(self, sql):
         self.cur.execute(sql)
         return self.cur.fetchall()
+
+    def cur(self):
+        return self.cur
 
     def close(self):
         self.cur.close()
