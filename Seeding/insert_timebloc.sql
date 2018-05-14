@@ -1,6 +1,5 @@
--- fill possible time values
+/* TABLE des bloc de temps possible (0-96) et leur nom */
 create table if not exists possibleTimeBloc (timeBloc int);
-
 CREATE OR REPLACE FUNCTION fill_possible() RETURNS void AS $$
 DECLARE
  time_id INTEGER;

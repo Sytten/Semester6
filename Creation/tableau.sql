@@ -1,3 +1,4 @@
+/* VUE HORAIRE */
 DROP VIEW IF EXISTS horaire;
 CREATE VIEW horaire AS
  SELECT
@@ -13,8 +14,8 @@ CREATE VIEW horaire AS
   LEFT JOIN evenements e on reservations.evenementid = e.evenementid -- ajout nom d'evenement
  ORDER BY date, timeBloc;
 
+/* PROCEDURE TABLEAU */
 DROP FUNCTION IF EXISTS tableau(tableauDate DATE, tableauDebut INT, tableauFin INT, tableauCategorie INT);
-
 CREATE OR REPLACE FUNCTION tableau(tableauDate DATE, tableauDebut INT, tableauFin INT, tableauCategorie INT) RETURNS
  TABLE(date DATE, dayTimeBloc INT, localNom TEXT, evenementNom VARCHAR) AS $$
  BEGIN
