@@ -17,6 +17,8 @@ class TestBase(unittest.TestCase):
         # Clean database
         self.cur.execute("""SELECT truncate_all_tables()""")
         self.cur.execute(open("../Seeding/insert_data.sql", "r").read())
+        self.cur.execute(open("../Seeding/insert_membre.sql", "r").read())
+        self.cur.execute(open("../Seeding/insert_timebloc.sql", "r").read())
 
     def tearDown(self):
         self.cur.close()
