@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      PostgreSQL 8                                 */
-/* Created on:     5/14/2018 8:46:29 AM                         */
+/* Created on:     5/14/2018 8:56:51 AM                         */
 /*==============================================================*/
 
 
@@ -395,7 +395,6 @@ create table PRIVILEGESRESERVATION (
    STATUSID             INT4                 not null,
    CATEGORIEID          INT4                 not null,
    PLUSDE24H            INT4                 not null,
-   LECTURE              INT4                 not null,
    ECRITURE             INT4                 not null,
    OVERRIDE             INT4                 not null,
    constraint PK_PRIVILEGESRESERVATION primary key (STATUSID, CATEGORIEID)
