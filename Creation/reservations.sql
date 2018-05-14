@@ -11,6 +11,74 @@ CREATE OR REPLACE VIEW calendrier AS
   JOIN reservations USING (evenementid)
   GROUP BY numeropavillon, numerolocal, date, cip;
 
+--------- SUPPRESSION ---------
+
+/* SUPPRESSION RESERVATIONS */
+CREATE OR REPLACE FUNCTION supprimer_reservations_local(local INTEGER, pavillon VARCHAR(16), debut INTEGER, fin INTEGER, date_res TIMESTAMP) RETURNS VOID AS $$
+DECLARE
+  evenement_id INTEGER;
+BEGIN
+  WHILE debut <= fin
+  LOOP
+    evenement_id := (SELECT evenementid FROM reservations WHERE (
+           numerolocal=local
+           AND numeropavillon=pavillon
+           AND date=date_res
+           AND numerobloc=debut
+        ));
+
+    IF evenement_id IS NOT NULL THEN
+      DELETE FROM evenements WHERE evenementid=evenement_id;
+    END IF;
+
+    debut := debut + 1;
+  END LOOP;
+
+END;
+$$ LANGUAGE plpgsql;
+
+/* SUPPRESSION EVENEMENTs */
+CREATE OR REPLACE FUNCTION supprimer_evenements(reservation calendrier, raise BOOLEAN DEFAULT TRUE) RETURNS VOID AS $$
+DECLARE
+  categorie INTEGER;
+  sum_overwrite INTEGER;
+  sous_local locaux%ROWTYPE;
+BEGIN
+  SELECT categorieid INTO categorie FROM locaux
+    WHERE numerolocal=reservation.numerolocal AND numeropavillon=reservation.numeropavillon;
+
+  SELECT SUM(override) INTO sum_overwrite FROM privilegesreservation
+    WHERE categorieid=categorie AND statusid IN (SELECT statusid
+                                                 FROM statusmembre
+                                                 WHERE cip=reservation.cip);
+
+  IF sum_overwrite = 0 OR sum_overwrite IS NULL THEN
+    IF raise THEN
+      RAISE EXCEPTION 'Vous ne pouvez pas supprimer les evenements pour ce local';
+    ELSE
+      RETURN;
+    END IF;
+  END IF;
+
+  PERFORM supprimer_reservations_local(reservation.numerolocal, reservation.numeropavillon, reservation.blocDebut, reservation.blocFin, reservation.date);
+
+  FOR sous_local IN SELECT * FROM locaux WHERE numerolocalparent=reservation.numerolocal and numeropavillonparent=reservation.numeropavillon LOOP
+    PERFORM supprimer_reservations_local(sous_local.numerolocal, sous_local.numeropavillon, reservation.blocDebut, reservation.blocFin, reservation.date);
+  END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+/* TRIGGER SUPPRESSION */
+CREATE OR REPLACE FUNCTION trigger_suppression_evenement() RETURNS TRIGGER AS $$
+BEGIN
+  PERFORM supprimer_evenements(OLD);
+
+  RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+--------- AJOUT ---------
+
 /* VERIFICATION SI PLAGE LIBRE */
 CREATE OR REPLACE FUNCTION verification_disponibilite_plage(local INTEGER, pavillon VARCHAR(16), debut INTEGER, fin INTEGER, date_res TIMESTAMP) RETURNS VOID AS $$
 DECLARE
@@ -96,19 +164,45 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-/* AJOUT DE LA RESERVATION */
-CREATE OR REPLACE FUNCTION ajout_reservation() RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION verification_date_heure(debut INTEGER, fin INTEGER, date DATE) RETURNS VOID AS $$
+BEGIN
+  IF fin < 0 OR fin > 95 THEN
+    RAISE EXCEPTION 'Fin doit etre entre 0 et 95';
+  END IF;
+
+  IF debut < 0 OR debut > 95 THEN
+    RAISE EXCEPTION 'Debut doit etre entre 0 et 95';
+  END IF;
+
+  IF fin < debut THEN
+    RAISE EXCEPTION 'Fin doit etre apres debut';
+  END IF;
+
+  IF date < CURRENT_DATE THEN
+    RAISE EXCEPTION 'Date ne peut etre dans le passe';
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+/* TRIGGER AJOUT */
+CREATE OR REPLACE FUNCTION trigger_ajout_reservation() RETURNS TRIGGER AS $$
 DECLARE
   event_id INTEGER;
 BEGIN
+  -- Verification de la validite de la date et heure
+  PERFORM verification_date_heure(NEW.blocDebut, NEW.blocFin, NEW.date);
+
   -- Verification des permissions
   PERFORM verification_droit_reservation(NEW);
 
-  -- Verification sous-locaux
-  PERFORM verification_sous_locaux(NEW.numerolocal, NEW.numeropavillon, NEW.blocDebut, NEW.blocFin, NEW.date);
-
   -- Verification debut fin de la categorie
   PERFORM verification_plage_categorie(NEW.numerolocal, NEW.numeropavillon, NEW.blocDebut, NEW.blocFin);
+
+  -- Try delete if can override
+  PERFORM supprimer_evenements(NEW, FALSE);
+
+  -- Verification sous-locaux
+  PERFORM verification_sous_locaux(NEW.numerolocal, NEW.numeropavillon, NEW.blocDebut, NEW.blocFin, NEW.date);
 
   -- Create new event
   SELECT MAX(evenementid) INTO event_id FROM evenements;
@@ -124,14 +218,20 @@ BEGIN
   LOOP
     INSERT INTO reservations VALUES (NEW.numeropavillon, NEW.numerolocal, NEW.date, NEW.blocDebut, event_id, NEW.cip);
     NEW.blocdebut := NEW.blocdebut + 1;
+
   END LOOP;
 
-  RETURN NULL;
+  RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
 /* AJOUT DU TRIGGER SUR LA VUE */
-DROP TRIGGER IF EXISTS ajout_evenement ON calendrier;
-CREATE TRIGGER ajout_evenement
+DROP TRIGGER IF EXISTS ajout_evenement_trigger ON calendrier;
+CREATE TRIGGER ajout_evenement_trigger
 INSTEAD OF INSERT ON calendrier
-    FOR EACH ROW EXECUTE PROCEDURE ajout_reservation();
+    FOR EACH ROW EXECUTE PROCEDURE trigger_ajout_reservation();
+
+DROP TRIGGER IF EXISTS suppression_evenement_trigger ON calendrier;
+CREATE TRIGGER suppression_evenement_trigger
+INSTEAD OF DELETE ON calendrier
+    FOR EACH ROW EXECUTE PROCEDURE trigger_suppression_evenement();
