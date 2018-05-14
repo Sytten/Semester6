@@ -211,7 +211,7 @@ BEGIN
   ELSE
     event_id := event_id + 1;
   END IF;
-  INSERT INTO evenements VALUES (event_id);
+  INSERT INTO evenements VALUES (event_id, event_id || 'event');
 
   -- Create reservations
   WHILE NEW.blocdebut <= NEW.blocfin
