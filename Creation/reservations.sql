@@ -52,6 +52,8 @@ BEGIN
                                                  FROM statusmembre
                                                  WHERE cip=reservation.cip);
 
+
+
   IF sum_overwrite = 0 OR sum_overwrite IS NULL THEN
     IF raise THEN
       RAISE EXCEPTION 'Vous ne pouvez pas supprimer les evenements pour ce local';
@@ -71,6 +73,9 @@ $$ LANGUAGE plpgsql;
 /* TRIGGER SUPPRESSION */
 CREATE OR REPLACE FUNCTION trigger_suppression_evenement() RETURNS TRIGGER AS $$
 BEGIN
+  -- Verification si est un sous-local avec parent reserve
+  PERFORM verification_sous_local_reserve(OLD.numerolocal, OLD.numeropavillon, OLD.blocDebut, OLD.blocFin, OLD.date);
+
   PERFORM supprimer_evenements(OLD);
 
   RETURN OLD;
@@ -90,15 +95,15 @@ BEGIN
            numerolocal=local AND numeropavillon=pavillon AND date=date_res AND numerobloc=debut
         ));
     IF (reservations_count != 0) THEN
-      RAISE EXCEPTION 'Local est deja reserve pour cette periode';
+      RAISE EXCEPTION 'Local est reserve pour cette periode';
     END IF;
     debut := debut + 1;
   END LOOP;
 END;
 $$ LANGUAGE plpgsql;
 
-/* VERIFICATION DES SOUS-LOCAUX */
-CREATE OR REPLACE FUNCTION verification_sous_locaux(local INTEGER, pavillon VARCHAR(16), debut INTEGER, fin INTEGER, date_res TIMESTAMP) RETURNS VOID AS $$
+/* VERIFICATION DE LA DISPONIBILITE DES SOUS-LOCAUX */
+CREATE OR REPLACE FUNCTION verification_disponibilite_sous_locaux(local INTEGER, pavillon VARCHAR(16), debut INTEGER, fin INTEGER, date_res TIMESTAMP) RETURNS VOID AS $$
 DECLARE
   sous_local locaux%ROWTYPE;
 BEGIN
@@ -184,10 +189,26 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+/* VERIFICATION SI SOUS-LOCAL ET PARENT RESERVE */
+CREATE OR REPLACE FUNCTION verification_sous_local_reserve(local INTEGER, pavillon VARCHAR(16), debut INTEGER, fin INTEGER, date_res TIMESTAMP) RETURNS VOID AS $$
+DECLARE
+  local_parent INTEGER;
+BEGIN
+  SELECT numerolocalparent INTO local_parent FROM locaux WHERE numerolocal=local AND numeropavillon=pavillon;
+
+  -- Si a un parent reserve -> throw
+  if local_parent IS NOT NULL THEN
+    PERFORM verification_disponibilite_plage(local_parent, pavillon, debut, fin, date_res);
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
 /* TRIGGER AJOUT */
 CREATE OR REPLACE FUNCTION trigger_ajout_reservation() RETURNS TRIGGER AS $$
 DECLARE
   event_id INTEGER;
+  sous_local INTEGER;
+  sous_locaux INTEGER[];
 BEGIN
   -- Verification de la validite de la date et heure
   PERFORM verification_date_heure(NEW.blocDebut, NEW.blocFin, NEW.date);
@@ -198,11 +219,14 @@ BEGIN
   -- Verification debut fin de la categorie
   PERFORM verification_plage_categorie(NEW.numerolocal, NEW.numeropavillon, NEW.blocDebut, NEW.blocFin);
 
-  -- Try delete if can override
+  -- Verification si est un sous-local avec parent reserve
+  PERFORM verification_sous_local_reserve(NEW.numerolocal, NEW.numeropavillon, NEW.blocDebut, NEW.blocFin, NEW.date);
+
+  -- Essaye de supprimer evenements existants si a les droits override
   PERFORM supprimer_evenements(NEW, FALSE);
 
   -- Verification sous-locaux
-  PERFORM verification_sous_locaux(NEW.numerolocal, NEW.numeropavillon, NEW.blocDebut, NEW.blocFin, NEW.date);
+  PERFORM verification_disponibilite_sous_locaux(NEW.numerolocal, NEW.numeropavillon, NEW.blocDebut, NEW.blocFin, NEW.date);
 
   -- Create new event
   SELECT MAX(evenementid) INTO event_id FROM evenements;
@@ -214,9 +238,16 @@ BEGIN
   INSERT INTO evenements VALUES (event_id);
 
   -- Create reservations
+  SELECT array_agg(numerolocal) INTO sous_locaux FROM locaux WHERE numerolocalparent=NEW.numerolocal and numeropavillonparent=NEW.numeropavillon;
   WHILE NEW.blocdebut <= NEW.blocfin
   LOOP
     INSERT INTO reservations VALUES (NEW.numeropavillon, NEW.numerolocal, NEW.date, NEW.blocDebut, event_id, NEW.cip);
+
+    IF sous_locaux IS NOT NULL THEN
+      FOREACH sous_local IN ARRAY sous_locaux LOOP
+        INSERT INTO reservations VALUES (NEW.numeropavillon, sous_local, NEW.date, NEW.blocDebut, event_id, NEW.cip);
+      END LOOP;
+    END IF;
     NEW.blocdebut := NEW.blocdebut + 1;
 
   END LOOP;
