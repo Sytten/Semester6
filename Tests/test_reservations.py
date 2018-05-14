@@ -7,9 +7,7 @@ class TestReservations(TestBase):
     def test_add_reservation(self):
         self.run_sqlf_test("test_add_reservation.sql")
 
-        self.cur.execute("""SELECT * FROM reservations""")
-
-        result = self.cur.fetchall()
+        result = self.db.execute("""SELECT * FROM reservations""")
 
         self.assertEqual(len(result), 6)
 
@@ -17,9 +15,7 @@ class TestReservations(TestBase):
         with self.assertRaises(psycopg2.IntegrityError):
             self.run_sqlf_test("test_reservation_conflict.sql")
 
-        self.cur.execute("""SELECT * FROM reservations""")
-
-        result = self.cur.fetchall()
+        result = self.sb.execute("""SELECT * FROM reservations""")
 
         self.assertEqual(len(result), 0)
 
@@ -27,9 +23,7 @@ class TestReservations(TestBase):
         with self.assertRaises(psycopg2.InternalError):
             self.run_sqlf_test("test_reservation_out_plage_horaire_avant.sql")
 
-        self.cur.execute("""SELECT * FROM reservations""")
-
-        result = self.cur.fetchall()
+        result = self.cur.execute("""SELECT * FROM reservations""")
 
         self.assertEqual(len(result), 0)
 
@@ -37,8 +31,6 @@ class TestReservations(TestBase):
         with self.assertRaises(psycopg2.InternalError):
             self.run_sqlf_test("test_reservation_out_plage_horaire_apres.sql")
 
-        self.cur.execute("""SELECT * FROM reservations""")
-
-        result = self.cur.fetchall()
+        result = self.db.execute("""SELECT * FROM reservations""")
 
         self.assertEqual(len(result), 0)
