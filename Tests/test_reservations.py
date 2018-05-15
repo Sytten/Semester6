@@ -21,12 +21,14 @@ class TestReservations(TestBase):
             self.db.execute("""INSERT INTO calendrier VALUES ('D7',3020,'2200-04-12','pers1234','toto',30,35)""")
 
     def test_reservation_conflict(self):
-        with self.assertRaisesRegex(psycopg2.IntegrityError, "update or delete on table \"evenements\" violates foreign key"):
-            self.run_sqlf_test("test_reservation_conflict.sql")
+        self.db.execute("""UPDATE tempsavantreservation SET numerobloc=4000000 WHERE statusid=2""")
+        self.db.execute("""INSERT INTO calendrier VALUES ('D7',3020,'2020-04-05','pers1234','toto',30,35)""")
+        with self.assertRaisesRegex(psycopg2.IntegrityError, "duplicate key value violates unique constraint \"pk_reservations\""):
+            self.db.execute("""INSERT INTO calendrier VALUES ('D7',3020,'2020-04-05','pers1234','toto',34,37)""")
 
         result = self.db.execute_fetch("""SELECT * FROM reservations""")
 
-        self.assertEqual(len(result), 0)
+        self.assertEqual(len(result), 6)
 
     def test_reservation_out_plage_horaire_avant(self):
         with self.assertRaisesRegex(psycopg2.InternalError, "Reservation en dehors de la plage de la categorie"):
@@ -51,3 +53,7 @@ class TestReservations(TestBase):
         result = self.db.execute_fetch("""SELECT * FROM reservations""")
 
         self.assertEqual(len(result), 4)
+
+    def test_delete_reservation_without_override(self):
+        self.db.execute("""INSERT INTO calendrier VALUES ('D7',3015,'2200-05-14','', 'toto',30,35)""")
+
