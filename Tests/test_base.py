@@ -10,7 +10,7 @@ class TestBase(unittest.TestCase):
         self.db.insert_data()
 
     def tearDown(self):
-        self.db.close();
+        self.db.close()
 
     def run_sqlf_test(self, filename):
         self.db.run_sqlf("Tests/SQL", filename)

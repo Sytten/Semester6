@@ -8,7 +8,7 @@ class TestReservations(TestBase):
     def test_add_reservation(self):
         self.run_sqlf_test("test_add_reservation.sql")
 
-        result = self.db.execute("""SELECT * FROM reservations""")
+        result = self.db.execute_fetch("""SELECT * FROM reservations""")
 
         self.assertEqual(len(result), 6)
 
@@ -18,13 +18,13 @@ class TestReservations(TestBase):
 
     def test_add_reservation_temps_avant_reservation_exceeded(self):
         with self.assertRaisesRegex(psycopg2.InternalError, "Vous ne pouvez pas reserver autant davance.+"):
-            self.db.cur.execute("""INSERT INTO calendrier VALUES ('D7',3020,'2200-04-12','pers1234','toto',30,35)""")
+            self.db.execute("""INSERT INTO calendrier VALUES ('D7',3020,'2200-04-12','pers1234','toto',30,35)""")
 
     def test_reservation_conflict(self):
         with self.assertRaisesRegex(psycopg2.IntegrityError, "update or delete on table \"evenements\" violates foreign key"):
             self.run_sqlf_test("test_reservation_conflict.sql")
 
-        result = self.db.execute("""SELECT * FROM reservations""")
+        result = self.db.execute_fetch("""SELECT * FROM reservations""")
 
         self.assertEqual(len(result), 0)
 
@@ -32,7 +32,7 @@ class TestReservations(TestBase):
         with self.assertRaisesRegex(psycopg2.InternalError, "Reservation en dehors de la plage de la categorie"):
             self.run_sqlf_test("test_reservation_out_plage_horaire_avant.sql")
 
-        result = self.db.execute("""SELECT * FROM reservations""")
+        result = self.db.execute_fetch("""SELECT * FROM reservations""")
 
         self.assertEqual(len(result), 0)
 
@@ -40,6 +40,14 @@ class TestReservations(TestBase):
         with self.assertRaisesRegex(psycopg2.InternalError, "Reservation en dehors de la plage de la categorie"):
             self.run_sqlf_test("test_reservation_out_plage_horaire_apres.sql")
 
-        result = self.db.execute("""SELECT * FROM reservations""")
+        result = self.db.execute_fetch("""SELECT * FROM reservations""")
 
         self.assertEqual(len(result), 0)
+
+    def test_reservation_override(self):
+        self.db.execute("""INSERT INTO calendrier VALUES ('D7',3015,'2200-05-14','girp2705', 'toto',30,35)""")
+        self.db.execute("""INSERT INTO calendrier VALUES ('D7',3015,'2200-05-14','girp2705', 'toto',31,34)""")
+
+        result = self.db.execute_fetch("""SELECT * FROM reservations""")
+
+        self.assertEqual(len(result), 4)

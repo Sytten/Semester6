@@ -37,9 +37,12 @@ class Database(object):
         # print("INSERT MEMBRES")
         self.run_sqlf("Seeding", "insert_membre.sql")
 
-    def execute(self, sql):
+    def execute_fetch(self, sql):
         self.cur.execute(sql)
         return self.cur.fetchall()
+
+    def execute(self, sql):
+        self.cur.execute(sql)
 
     def cur(self):
         return self.cur

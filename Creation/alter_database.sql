@@ -7,6 +7,13 @@ ALTER TABLE locaux RENAME LOC_NUMEROLOCAL TO NUMEROLOCALPARENT;
 
 ALTER TABLE logs ALTER COLUMN logdate TYPE TIMESTAMP;
 
+/* CHANGE CONSTRAINT OF EVENT TO CASCADE DELETE */
+ALTER TABLE public.reservations DROP CONSTRAINT fk_reservat_evenement_evenemen;
+ALTER TABLE public.reservations
+  ADD CONSTRAINT fk_reservat_evenement_evenemen FOREIGN KEY (evenementid)
+    REFERENCES evenements (evenementid)
+      ON DELETE CASCADE ON UPDATE RESTRICT;
+
 
 /* TRUNCATE ALL TABLES */
 CREATE OR REPLACE FUNCTION truncate_all_tables() RETURNS void AS $$
