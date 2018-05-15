@@ -22,9 +22,6 @@ BEGIN
 END; $$
 LANGUAGE 'plpgsql';
 
-SELECT remplir_temps_possible();
--- select * from blocTempsPossible;
-
 /* VUE HORAIRE */
 DROP VIEW IF EXISTS horaire;
 CREATE VIEW horaire AS

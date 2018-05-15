@@ -21,7 +21,6 @@ class TestContraintes(TestBase):
         self.db.execute("""INSERT INTO categories VALUES(9999, 'nom de local', 0, 95)""")
 
     def test_bloc_possible_out_0_95(self):
-        self.db.execute("""TRUNCATE TABLE blocTempsPossible""")
         with self.assertRaisesRegex(psycopg2.IntegrityError, "value for domain blocdomain violates check constraint \"blocdomain_check\""):
             self.db.execute("""INSERT INTO bloctempspossible VALUES(-1, 'ninenine')""")
 
@@ -29,9 +28,8 @@ class TestContraintes(TestBase):
             self.db.execute("""INSERT INTO bloctempspossible VALUES(96, 'sixxxsix')""")
 
     def test_bloc_possible_between_0_95(self):
-        self.db.execute("""TRUNCATE TABLE blocTempsPossible""")
-        self.db.execute("""INSERT INTO bloctempspossible VALUES(0, 'zero')""")
-        self.db.execute("""INSERT INTO bloctempspossible VALUES(95, 'ninetofive')""")
+        result = self.db.execute_fetch("""SELECT * FROM bloctempspossible""")
+        self.assertEqual(96, len(result))
 
     def test_reservation_bloc_out_0_95(self):
         self.db.execute("""INSERT INTO evenements VALUES (0,'hi')""")
