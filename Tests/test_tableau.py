@@ -5,7 +5,7 @@ from test_base import TestBase
 class TestReservations(TestBase):
     def test_tableau(self):
         self.db.execute("""INSERT INTO calendrier VALUES ('D7',3020,'2200-04-05','girp2705','toto',30,35)""")
-        result = self.db.execute_fetch("""SELECT * FROM TABLEAU('2200-04-05', 0, 96, 110) ORDER BY tempsNom, localNom, evenementNom""")
+        result = self.db.execute_fetch("""SELECT * FROM TABLEAU('2200-04-05', 0, 96, 110)""")
 
         # ResultData.dump("test_tableau1", result)
         expected_result = ResultData.load("test_tableau1")
