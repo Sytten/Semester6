@@ -11,6 +11,3 @@ class TestBase(unittest.TestCase):
 
     def tearDown(self):
         self.db.close()
-
-    def run_sqlf_test(self, filename):
-        self.db.run_sqlf("Tests/SQL", filename)
