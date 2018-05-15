@@ -2,6 +2,24 @@
 ALTER TABLE categories ALTER blocDebut SET DEFAULT 0;
 ALTER TABLE categories ALTER blocFin SET DEFAULT 95;
 
+/* POSITIVE PRIMARY KEY */
+ALTER TABLE status DROP CONSTRAINT IF EXISTS positive_pk;
+ALTER TABLE status ADD CONSTRAINT positive_pk CHECK(statusid >= 0);
+ALTER TABLE locaux DROP CONSTRAINT IF EXISTS positive_pk;
+ALTER TABLE locaux ADD CONSTRAINT positive_pk CHECK(numerolocal >= 0);
+ALTER TABLE facultes DROP CONSTRAINT IF EXISTS positive_pk;
+ALTER TABLE facultes ADD CONSTRAINT positive_pk CHECK(faculteid >= 0);
+ALTER TABLE evenements DROP CONSTRAINT IF EXISTS positive_pk;
+ALTER TABLE evenements ADD CONSTRAINT positive_pk CHECK(evenementid >= 0);
+ALTER TABLE departements DROP CONSTRAINT IF EXISTS positive_pk;
+ALTER TABLE departements ADD CONSTRAINT positive_pk CHECK(departementid >= 0);
+ALTER TABLE categories DROP CONSTRAINT IF EXISTS positive_pk;
+ALTER TABLE categories ADD CONSTRAINT positive_pk CHECK(categorieid >= 0);
+ALTER TABLE caracteristiques DROP CONSTRAINT IF EXISTS positive_pk;
+ALTER TABLE caracteristiques ADD CONSTRAINT positive_pk CHECK(equipementid >= 0);
+ALTER TABLE campus DROP CONSTRAINT IF EXISTS positive_pk;
+ALTER TABLE campus ADD CONSTRAINT positive_pk CHECK(campusid >= 0);
+
 /* BLOC DOMAIN ON CATEGORIE */
 DROP DOMAIN IF EXISTS blocDomain;
 CREATE DOMAIN blocDomain AS INTEGER CHECK(VALUE BETWEEN 0 and 95);
