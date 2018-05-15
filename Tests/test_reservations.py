@@ -55,5 +55,12 @@ class TestReservations(TestBase):
         self.assertEqual(len(result), 4)
 
     def test_delete_reservation_without_override(self):
-        self.db.execute("""INSERT INTO calendrier VALUES ('D7',3015,'2200-05-14','', 'toto',30,35)""")
+        self.db.execute("""UPDATE tempsavantreservation SET numerobloc=4000000 WHERE statusid=2""")
+        self.db.execute("""INSERT INTO calendrier VALUES ('D7',3020,'2020-04-05','pers1234','toto',30,35)""")
 
+        with self.assertRaisesRegex(psycopg2.InternalError, "Vous ne pouvez pas supprimer les evenements pour ce local"):
+            self.db.execute("""DELETE FROM calendrier WHERE cip='pers1234'""")
+
+        result = self.db.execute_fetch("""SELECT * FROM reservations""")
+
+        self.assertEqual(len(result), 6)
