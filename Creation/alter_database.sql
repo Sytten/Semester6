@@ -20,17 +20,13 @@ ALTER TABLE caracteristiques ADD CONSTRAINT positive_pk CHECK(equipementid >= 0)
 ALTER TABLE campus DROP CONSTRAINT IF EXISTS positive_pk;
 ALTER TABLE campus ADD CONSTRAINT positive_pk CHECK(campusid >= 0);
 
-/* BLOC DOMAIN ON CATEGORIE */
-DROP DOMAIN IF EXISTS blocDomain;
-CREATE DOMAIN blocDomain AS INTEGER CHECK(VALUE BETWEEN 0 and 95);
-ALTER TABLE categories ALTER COLUMN blocDebut SET DATA TYPE blocDomain;
-ALTER TABLE categories ALTER COLUMN blocFin SET DATA TYPE blocDomain;
-
-/* BLOC DOMAIN ON BLOCTEMPSPOSSIBLE */
-ALTER TABLE bloctempspossible ALTER COLUMN bloctempsid SET DATA TYPE blocDomain;
-
-/* BLOC DOMAIN ON RESERVATION */
-ALTER TABLE reservations ALTER COLUMN numerobloc SET DATA TYPE blocDomain;
+/* BLOC DOMAIN */
+ALTER TABLE categories DROP CONSTRAINT IF EXISTS bloc_domain;
+ALTER TABLE categories ADD CONSTRAINT bloc_domain CHECK(blocDebut BETWEEN 0 and 95 AND blocFin BETWEEN 0 and 95);
+ALTER TABLE bloctempspossible DROP CONSTRAINT IF EXISTS bloc_domain;
+ALTER TABLE bloctempspossible ADD CONSTRAINT bloc_domain CHECK(bloctempsid BETWEEN 0 and 95);
+ALTER TABLE reservations DROP CONSTRAINT IF EXISTS bloc_domain;
+ALTER TABLE reservations ADD CONSTRAINT bloc_domain CHECK(numerobloc BETWEEN 0 and 95);
 
 /* RENAME LOCAUX COLUMNS */
 ALTER TABLE locaux RENAME LOC_NUMEROPAVILLON TO NUMEROPAVILLONPARENT;
@@ -45,7 +41,6 @@ ALTER TABLE public.reservations
   ADD CONSTRAINT fk_reservat_evenement_evenemen FOREIGN KEY (evenementid)
     REFERENCES evenements (evenementid)
       ON DELETE CASCADE ON UPDATE RESTRICT;
-
 
 /* TRUNCATE ALL TABLES FUNCTION */
 CREATE OR REPLACE FUNCTION truncate_all_tables() RETURNS void AS $$
