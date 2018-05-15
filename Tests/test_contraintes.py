@@ -4,6 +4,16 @@ from test_base import TestBase
 
 
 class TestContraintes(TestBase):
+    def test_cip_empty(self):
+        with self.assertRaisesRegex(psycopg2.IntegrityError,
+                                    "new row for relation \"membres\" violates check constraint \"not_empty_cip\""):
+            self.db.execute("""INSERT INTO membres VALUES('   ',18,8,'perso','PERSONNEL SOUTIENT')""")
+
+    def test_capacite_locaux(self):
+        with self.assertRaisesRegex(psycopg2.IntegrityError,
+                                    "new row for relation \"locaux\" violates check constraint \"positive_cap\""):
+            self.db.execute("""INSERT INTO locaux VALUES('C1', 1000, null, null, 110, 0, null)""")
+
     def test_categorie_bloc_out_0_and_95(self):
         with self.assertRaisesRegex(psycopg2.IntegrityError, "new row for relation \"categories\" violates check constraint \"bloc_domain\""):
             self.db.execute("""INSERT INTO categories VALUES(9999, 'nom de local', 0, 96)""")
