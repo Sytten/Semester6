@@ -5,11 +5,12 @@ CREATE OR REPLACE VIEW calendrier AS
   numerolocal,
   date,
   cip,
+  nom AS description,
   MIN(numerobloc) AS blocDebut,
   MAX(numerobloc) AS blocFin
   FROM evenements
   JOIN reservations USING (evenementid)
-  GROUP BY numeropavillon, numerolocal, date, cip;
+  GROUP BY numeropavillon, numerolocal, date, cip, nom;
 
 --------- SUPPRESSION ---------
 
@@ -161,7 +162,7 @@ BEGIN
                                                                                                      FROM statusmembre
                                                                                                      WHERE cip=reservation.cip);
 
-  diff_temps := now() - (reservation.date + reservation.blocDebut * INTERVAL '15 minutes');
+  diff_temps := (reservation.date + reservation.blocDebut * INTERVAL '15 minutes') - now();
 
   IF (max_temps IS NULL OR diff_temps > max_temps) AND (sum_plusde24h = 0 OR sum_plusde24h IS NULL) THEN
     RAISE EXCEPTION 'Vous ne pouvez pas reserver autant davance: %s', diff_temps;
@@ -235,7 +236,7 @@ BEGIN
   ELSE
     event_id := event_id + 1;
   END IF;
-  INSERT INTO evenements VALUES (event_id, event_id || 'event');
+  INSERT INTO evenements VALUES (event_id, NEW.description);
 
   -- Create reservations
   SELECT array_agg(numerolocal) INTO sous_locaux FROM locaux WHERE numerolocalparent=NEW.numerolocal and numeropavillonparent=NEW.numeropavillon;
